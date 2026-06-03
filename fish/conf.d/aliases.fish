@@ -5,6 +5,10 @@ alias ..="cd ../"
 alias ...="cd ../../"
 alias ....="cd ../../../"
 
+# Fish
+alias configfish="cd ~/.config/fish/"
+alias sourcefish="source ~/.config/fish/config.fish"
+
 # Git
 alias gstat="git status"
 alias gpull="git pull"
