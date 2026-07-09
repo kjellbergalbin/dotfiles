@@ -1,0 +1,49 @@
+install_fish() {
+    if command -v fish &>/dev/null; then
+        info "fish already installed: $(command -v fish)"
+        return
+    fi
+    step "Installing fish..."
+    if [[ "$OS" == "Darwin" ]]; then
+        brew install fish
+    elif [[ "$OS" == "Linux" ]]; then
+        echo 'deb https://download.opensuse.org/repositories/shells:/fish:/release:/4/Debian_13/ /' \
+            | sudo tee /etc/apt/sources.list.d/shells:fish:release:4.list
+        curl -fsSL https://download.opensuse.org/repositories/shells:/fish:/release:/4/Debian_13/Release.key \
+            | gpg --dearmor \
+            | sudo tee /etc/apt/trusted.gpg.d/shells_fish_release_4.gpg > /dev/null
+        sudo apt-get update -q
+        sudo apt-get install -y fish
+    fi
+}
+
+set_default_shell() {
+    local fish_path
+    fish_path="$(command -v fish)"
+    if ! grep -qxF "$fish_path" /etc/shells; then
+        step "Registering $fish_path in /etc/shells..."
+        echo "$fish_path" | sudo tee -a /etc/shells
+    fi
+    if [[ "$SHELL" != "$fish_path" ]]; then
+        step "Setting default shell to fish..."
+        chsh -s "$fish_path"
+    fi
+}
+
+sync_fish_config() {
+    step "Syncing fish config..."
+    local fish_dir="$HOME/.config/fish"
+    mkdir -p "$fish_dir/conf.d" "$fish_dir/functions"
+
+    ln -sf "$DOTFILES_DIR/fish/config.fish" "$fish_dir/config.fish"
+
+    for f in "$DOTFILES_DIR/fish/conf.d/"*.fish; do
+        [[ -e "$f" ]] || continue
+        ln -sf "$f" "$fish_dir/conf.d/$(basename "$f")"
+    done
+
+    for f in "$DOTFILES_DIR/fish/functions/"*.fish; do
+        [[ -e "$f" ]] || continue
+        ln -sf "$f" "$fish_dir/functions/$(basename "$f")"
+    done
+}
