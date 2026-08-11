@@ -26,7 +26,14 @@ set_default_shell() {
     fi
     if [[ "$SHELL" != "$fish_path" ]]; then
         step "Setting default shell to fish..."
-        chsh -s "$fish_path"
+        if [[ "$OS" == "Linux" ]]; then
+            # chsh authenticates via PAM against the account password, which
+            # WSL users often never set — use usermod (via sudo) instead, it
+            # edits /etc/passwd directly with no separate password prompt.
+            sudo usermod -s "$fish_path" "$USER"
+        else
+            chsh -s "$fish_path"
+        fi
     fi
 }
 
