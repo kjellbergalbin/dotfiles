@@ -19,6 +19,7 @@ if [[ "$OS" == "Linux" ]]; then
 fi
 
 WORKDIR=""
+PRIVATE_REPO_MISSING=false
 
 step() { echo "==> $*"; }
 info() { echo "    $*"; }
@@ -31,6 +32,15 @@ source "$DOTFILES_DIR/modules/starship.sh"
 if ! $SERVER_MODE; then
     source "$DOTFILES_DIR/modules/fonts.sh"
 fi
+
+run_private_hooks() {
+    local private_dir="$HOME/Repositories/dotfiles-private"
+    if [[ -f "$private_dir/rotate-claude-key.sh" ]]; then
+        info "Found dotfiles-private: run '$private_dir/rotate-claude-key.sh <key>' to set your Claude Code key."
+    elif [[ ! -d "$private_dir" ]]; then
+        PRIVATE_REPO_MISSING=true
+    fi
+}
 
 main() {
     WORKDIR="$(mktemp -d)"
@@ -51,13 +61,20 @@ main() {
     setup_ssh
     [[ "$IS_WSL" == true ]] && setup_git_credentials
     sync_fish_config
+    run_private_hooks
 
     echo ""
     echo "Your SSH public key — add this to GitHub/GitLab/etc.:"
     echo "──────────────────────────────────────────────────────"
     cat "$HOME/.ssh/id_ed25519.pub"
     echo "──────────────────────────────────────────────────────"
-    echo ""
+    if $PRIVATE_REPO_MISSING; then
+        echo "Once the key above is added to GitHub, fetch dotfiles-private and rotate your Claude Code key:"
+        echo "  git clone git@github.com:kjellbergalbin/dotfiles-private.git ~/Repositories/dotfiles-private"
+        echo "  ~/Repositories/dotfiles-private/rotate-claude-key.sh <key>"
+        echo ""
+    fi
+
     echo "Done! Re-login or open a new terminal to start using fish."
 }
 
