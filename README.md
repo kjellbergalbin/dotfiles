@@ -5,11 +5,15 @@ fish, starship, fonts, git/SSH config, and syncs fish config via symlinks.
 
 ## Quick start
 
-On a fresh machine:
+On a fresh machine, `curl` may not be installed yet. Install it first, then
+fetch and run the bootstrap script:
 
 ```sh
+command -v curl >/dev/null || (sudo apt-get update -q && sudo apt-get install -y curl)
 curl -fsSL https://raw.githubusercontent.com/kjellbergalbin/dotfiles/main/bootstrap.sh | bash
 ```
+
+(macOS ships with `curl` preinstalled, so the first line is a no-op there.)
 
 This clones the repo into `~/Repositories/dotfiles` (pulling latest if it's
 already there) and runs `install.sh`.
