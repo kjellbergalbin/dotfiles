@@ -4,7 +4,7 @@ install_starship() {
         return
     fi
     step "Installing starship..."
-    if [[ "$OS" == "Darwin" ]]; then
+    if [[ "$OS" == "Darwin" ]] || $NO_SUDO; then
         brew install starship
     else
         local installer="$WORKDIR/install-starship.sh"

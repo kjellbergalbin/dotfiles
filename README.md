@@ -43,6 +43,22 @@ This still installs base packages, fish, starship, and the Nerd Font
 SSH key/agent setup, the WSL git credential manager step, and the
 dotfiles-private hook.
 
+### No-sudo install
+
+For an extra/restricted Linux account with no sudo access (assumes an admin
+already installed base packages like `curl`/`git`), add `--no-sudo`:
+
+```sh
+./install.sh --fish-only --no-sudo
+```
+
+This skips `apt`/system-package steps entirely. Instead it installs a
+user-owned Homebrew into `~/.homebrew` (no root required) and uses it to
+install fish and starship. For the default shell, it tries `chsh` (works if
+your account has a password set); if that's not possible without root, it
+falls back to appending an auto-exec-fish snippet to `~/.bashrc` (or
+`~/.profile`) so fish starts automatically on login instead.
+
 ## What it sets up
 
 - **Homebrew** (macOS) or base build tools via `apt` (Linux)

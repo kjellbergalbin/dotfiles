@@ -21,7 +21,13 @@ fi
 WORKDIR=""
 PRIVATE_REPO_MISSING=false
 FISH_ONLY=false
-[[ "${1:-}" == "--fish-only" ]] && FISH_ONLY=true
+NO_SUDO=false
+for arg in "$@"; do
+    case "$arg" in
+        --fish-only) FISH_ONLY=true ;;
+        --no-sudo) NO_SUDO=true ;;
+    esac
+done
 
 step() { echo "==> $*"; }
 info() { echo "    $*"; }
@@ -52,8 +58,12 @@ main() {
         info "Server/headless mode detected — skipping fonts and desktop modules."
     fi
 
-    [[ "$OS" == "Darwin" ]] && install_homebrew
-    [[ "$OS" == "Linux" ]]  && install_base_packages
+    if [[ "$OS" == "Darwin" ]] || $NO_SUDO; then
+        install_homebrew
+    fi
+    if [[ "$OS" == "Linux" ]] && ! $NO_SUDO; then
+        install_base_packages
+    fi
     install_fish
     set_default_shell
     install_starship

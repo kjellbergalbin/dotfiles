@@ -4,7 +4,7 @@ install_fish() {
         return
     fi
     step "Installing fish..."
-    if [[ "$OS" == "Darwin" ]]; then
+    if [[ "$OS" == "Darwin" ]] || $NO_SUDO; then
         brew install fish
     elif [[ "$OS" == "Linux" ]]; then
         echo 'deb https://download.opensuse.org/repositories/shells:/fish:/release:/4/Debian_13/ /' \
@@ -20,6 +20,29 @@ install_fish() {
 set_default_shell() {
     local fish_path
     fish_path="$(command -v fish)"
+
+    if $NO_SUDO; then
+        if [[ "$SHELL" == "$fish_path" ]]; then
+            return
+        fi
+        step "Setting default shell to fish..."
+        if grep -qxF "$fish_path" /etc/shells 2>/dev/null && chsh -s "$fish_path" 2>/dev/null; then
+            return
+        fi
+        info "chsh unavailable without sudo — launching fish automatically from login instead."
+        local rc_file="$HOME/.bashrc"
+        [[ -f "$rc_file" ]] || rc_file="$HOME/.profile"
+        if ! grep -qF "exec \"$fish_path\" -l" "$rc_file" 2>/dev/null; then
+            {
+                echo ''
+                echo 'if [ -t 1 ]; then'
+                echo "    exec \"$fish_path\" -l"
+                echo 'fi'
+            } >> "$rc_file"
+        fi
+        return
+    fi
+
     if ! grep -qxF "$fish_path" /etc/shells; then
         step "Registering $fish_path in /etc/shells..."
         echo "$fish_path" | sudo tee -a /etc/shells
