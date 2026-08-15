@@ -20,6 +20,8 @@ fi
 
 WORKDIR=""
 PRIVATE_REPO_MISSING=false
+FISH_ONLY=false
+[[ "${1:-}" == "--fish-only" ]] && FISH_ONLY=true
 
 step() { echo "==> $*"; }
 info() { echo "    $*"; }
@@ -58,21 +60,23 @@ main() {
     if ! $SERVER_MODE; then
         install_font
     fi
-    setup_ssh
-    [[ "$IS_WSL" == true ]] && setup_git_credentials
     sync_fish_config
-    run_private_hooks
+    if ! $FISH_ONLY; then
+        setup_ssh
+        [[ "$IS_WSL" == true ]] && setup_git_credentials
+        run_private_hooks
 
-    echo ""
-    echo "Your SSH public key — add this to GitHub/GitLab/etc.:"
-    echo "──────────────────────────────────────────────────────"
-    cat "$HOME/.ssh/id_ed25519.pub"
-    echo "──────────────────────────────────────────────────────"
-    if $PRIVATE_REPO_MISSING; then
-        echo "Once the key above is added to GitHub, fetch dotfiles-private and rotate your Claude Code key:"
-        echo "  git clone git@github.com:kjellbergalbin/dotfiles-private.git ~/Repositories/dotfiles-private"
-        echo "  ~/Repositories/dotfiles-private/rotate-claude-key.sh <key>"
         echo ""
+        echo "Your SSH public key — add this to GitHub/GitLab/etc.:"
+        echo "──────────────────────────────────────────────────────"
+        cat "$HOME/.ssh/id_ed25519.pub"
+        echo "──────────────────────────────────────────────────────"
+        if $PRIVATE_REPO_MISSING; then
+            echo "Once the key above is added to GitHub, fetch dotfiles-private and rotate your Claude Code key:"
+            echo "  git clone git@github.com:kjellbergalbin/dotfiles-private.git ~/Repositories/dotfiles-private"
+            echo "  ~/Repositories/dotfiles-private/rotate-claude-key.sh <key>"
+            echo ""
+        fi
     fi
 
     echo "Done! Re-login or open a new terminal to start using fish."

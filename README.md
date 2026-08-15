@@ -26,6 +26,23 @@ Already have the repo cloned? Just run:
 
 Both scripts are safe to re-run.
 
+### Fish-only install
+
+Want just the fish shell setup (e.g. a new user account on an existing
+machine) without SSH key generation or the private-repo hook? Pass
+`--fish-only`:
+
+```sh
+./install.sh --fish-only
+# or, from scratch:
+curl -fsSL https://raw.githubusercontent.com/kjellbergalbin/dotfiles/main/bootstrap.sh | bash -s -- --fish-only
+```
+
+This still installs base packages, fish, starship, and the Nerd Font
+(respecting headless/server mode), and syncs the fish config — it just skips
+SSH key/agent setup, the WSL git credential manager step, and the
+dotfiles-private hook.
+
 ## What it sets up
 
 - **Homebrew** (macOS) or base build tools via `apt` (Linux)

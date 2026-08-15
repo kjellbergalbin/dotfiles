@@ -38,7 +38,7 @@ main() {
     clone_or_update
 
     step "Running install.sh..."
-    exec bash "$DOTFILES_DIR/install.sh"
+    exec bash "$DOTFILES_DIR/install.sh" "$@"
 }
 
 main "$@"
